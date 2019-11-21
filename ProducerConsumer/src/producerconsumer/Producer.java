@@ -15,12 +15,13 @@ public class Producer extends Thread {
     @Override
     public void run() {
         System.out.println("Running Producer...");
-        String products = "AEIOU";
+        String productNum = "1234567890";
+        String productOps = "+-*/";
         Random r = new Random(System.currentTimeMillis());
-        char product;
+        String product;
         
         for(int i=0 ; i<5 ; i++) {
-            product = products.charAt(r.nextInt(5));
+            product = "("+productOps.charAt(r.nextInt(productOps.length()))+" "+productNum.charAt(r.nextInt(productNum.length()))+" "+productNum.charAt(r.nextInt(productNum.length()))+")";
             this.buffer.produce(product);
             //System.out.println("Producer produced: " + product);
             Buffer.print("Producer produced: " + product);

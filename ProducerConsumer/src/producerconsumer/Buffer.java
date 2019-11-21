@@ -6,31 +6,39 @@ import java.util.logging.Logger;
 
 public class Buffer {
     
-    private char buffer;
+    private String buffer;
+    private SchemeSolver solver;
     
     Buffer() {
-        this.buffer = 0;
+        this.buffer = "";
+        this.solver = new SchemeSolver();
     }
     
-    synchronized char consume() {
-        char product = 0;
+    synchronized String consume() {
+        float result = 0;
+        String product = "";
         
-        if(this.buffer == 0) {
+        if(this.buffer.equals("")) {
             try {
                 wait(1000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Buffer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        product = this.buffer;
-        this.buffer = 0;
+        
+        this.solver.setA(this.buffer.charAt(3) - 0x30);
+        this.solver.setB(this.buffer.charAt(5) - 0x30);
+        this.solver.setOp(this.buffer.charAt(1));
+        result = this.solver.solve();
+        product = this.buffer + " returns --> " + result;
+        this.buffer = "";
         notify();
         
         return product;
     }
     
-    synchronized void produce(char product) {
-        if(this.buffer != 0) {
+    synchronized void produce(String product) {
+        if(!(this.buffer.equals(""))) {
             try {
                 wait(1000);
             } catch (InterruptedException ex) {
