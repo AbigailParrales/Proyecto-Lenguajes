@@ -1,24 +1,32 @@
 
 package producerconsumer;
 
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Buffer {
     
-    private String buffer;
-    private SchemeSolver solver;
+    private Stack<String> buffer;
+    private final SchemeSolver solver;
+    private int cSize, uSize;
     
     Buffer() {
-        this.buffer = "";
+        this.buffer = new Stack<>();
         this.solver = new SchemeSolver();
+        this.cSize=0;
+        this.uSize=5;
+    }
+
+    public void setuSize(int uSize) {
+        this.uSize = uSize;
     }
     
     synchronized String consume() {
-        float result = 0;
-        String product = "";
+        float result;
+        String product;
         
-        if(this.buffer.equals("")) {
+        while(this.buffer.empty()){
             try {
                 wait(1000);
             } catch (InterruptedException ex) {
@@ -26,26 +34,29 @@ public class Buffer {
             }
         }
         
-        this.solver.setA(this.buffer.charAt(3) - 0x30);
-        this.solver.setB(this.buffer.charAt(5) - 0x30);
-        this.solver.setOp(this.buffer.charAt(1));
+        String thisProduct = this.buffer.pop();
+        this.solver.setA(thisProduct.charAt(3) - 0x30);
+        this.solver.setB(thisProduct.charAt(5) - 0x30);
+        this.solver.setOp(thisProduct.charAt(1));
         result = this.solver.solve();
-        product = this.buffer + " returns --> " + result;
-        this.buffer = "";
+        product = thisProduct + " returns --> " + result;
         notify();
         
         return product;
     }
     
     synchronized void produce(String product) {
-        if(!(this.buffer.equals(""))) {
+        while(!this.buffer.empty()) {
             try {
                 wait(1000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Buffer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        this.buffer = product;
+        if(this.cSize<this.uSize){
+            this.buffer.add(product);
+            cSize++;
+        }
         
         notify();
     }
