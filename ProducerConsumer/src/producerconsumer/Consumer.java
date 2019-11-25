@@ -14,18 +14,19 @@ public class Consumer extends Thread {
     
     @Override
     public void run() {
-        System.out.println("Running Consumer"+Integer.toString(idN)+"...");
-        String product;
-        
-        product = this.buffer.consume();
-        //System.out.println("Consumer consumed: " + product);
-        Buffer.print("Consumer" + Integer.toString(this.idN) + " consumed: " + product);
-            
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        while(true){
+			System.out.println("Running Consumer"+Integer.toString(idN)+"...");
+			String product;
+			
+			product = this.buffer.consume();
+			//System.out.println("Consumer consumed: " + product);
+			Buffer.print("Consumer" + Integer.toString(this.idN) + " consumed: " + product);
+				
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException ex) {
+				Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
     }
 }

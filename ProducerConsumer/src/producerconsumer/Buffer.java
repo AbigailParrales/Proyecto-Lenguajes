@@ -10,25 +10,37 @@ public class Buffer {
     private Stack<String> buffer;
     private final SchemeSolver solver;
     private int cSize, uSize;
+    private boolean isFull;
     
     Buffer() {
         this.buffer = new Stack<>();
         this.solver = new SchemeSolver();
         this.cSize=0;
         this.uSize=5;
+        this.isFull = false;
     }
 
     public void setuSize(int uSize) {
         this.uSize = uSize;
     }
+	
+	public boolean isFull() {
+		if(this.cSize<this.uSize){
+            this.isFull = false;
+        } else {
+			this.isFull = true;
+		}
+		
+		return this.isFull;
+	}
     
     synchronized String consume() {
         float result;
         String product;
         
-        while(this.buffer.empty()){
+        if(this.buffer.empty()){
             try {
-                wait(1000);
+                wait();
             } catch (InterruptedException ex) {
                 Logger.getLogger(Buffer.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -40,23 +52,24 @@ public class Buffer {
         this.solver.setOp(thisProduct.charAt(1));
         result = this.solver.solve();
         product = thisProduct + " returns --> " + result;
+		cSize--;
+		
         notify();
         
         return product;
     }
     
     synchronized void produce(String product) {
-        while(!this.buffer.empty()) {
+        if(this.isFull()) {
             try {
-                wait(1000);
+                wait();
             } catch (InterruptedException ex) {
                 Logger.getLogger(Buffer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        if(this.cSize<this.uSize){
-            this.buffer.add(product);
-            cSize++;
-        }
+        
+		this.buffer.add(product);
+        cSize++;
         
         notify();
     }
